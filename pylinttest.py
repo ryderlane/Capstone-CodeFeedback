@@ -1,14 +1,16 @@
 from pylint.lint import Run
-from ollama import chat
+from io import StringIO
+from pylint.lint import Run
+from pylint.reporters.text import TextReporter
 
 test_file = "test.py"
 
-prompt_content = f"review this code and fix any errors:\n\n```python\n{test_file}\n```"
+pylint_output = StringIO()
+reporter = TextReporter(pylint_output)
 
-response = chat(
-    model='codellama',
-    messages=[{'role': 'user', 'content': prompt_content}],
-)
-print(response.message.content)
+# exit=False keeps the python process alive after the linter finishes
+Run([test_file], reporter=reporter, exit=False)
 
-Run([test_file])
+# Retrieve the text report
+report_content = pylint_output.getvalue()
+print(report_content)
